@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>P.A.C.E. Nutrition Calculator</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!-- Add this at the very top -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                blue: {
+                    50: '#eff6ff',
+                    100: '#dbeafe',
+                    600: '#2563eb',
+                    700: '#1d4ed8',
+                },
+                gray: {
+                    50: '#f9fafb',
+                    100: '#f3f4f6',
+                    200: '#e5e7eb',
+                    300: '#d1d5db',
+                    400: '#9ca3af',
+                    500: '#6b7280',
+                    600: '#4b5563',
+                    700: '#374151',
+                },
+                green: {
+                    600: '#16a34a',
+                },
+                red: {
+                    600: '#dc2626',
+                },
+                orange: {
+                    700: '#c2410c',
+                },
+                cyan: {
+                    700: '#0e7490',
+                }
+            }
+        }
+    }
+}
+</script>
+<!-- Main content starts here -->
+<div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-100">
+    <h2 class="text-xl font-semibold text-blue-700 mb-6 pb-2 border-b border-blue-100">Personal Information</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col">
+                <div class="flex items-center mb-2">
+                    <label class="font-medium text-gray-700 mr-4">Weight</label>
+                    <div class="relative inline-block w-16 align-middle select-none">
+                        <input type="checkbox" id="weightToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="updateWeightUnit()"/>
+                        <label for="weightToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                    </div>
+                    <span id="weightUnitLabel" class="ml-2 text-sm">kg</span>
+                </div>
+                <input type="number" id="currentWeight" class="border rounded-md px-3 py-2" placeholder="Current weight">
+            </div>
+            
+            <div class="flex flex-col">
+                <label for="desiredWeight" class="font-medium text-gray-700 mb-2">Desired Weight</label>
+                <input type="number" id="desiredWeight" class="border rounded-md px-3 py-2" placeholder="Enter desired weight">
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col">
+                <label for="height" class="font-medium text-gray-700 mb-2">Height (cm)</label>
+                <input type="number" id="height" class="border rounded-md px-3 py-2" placeholder="Enter height">
+            </div>
+            
+            <div class="flex flex-col">
+                <label for="age" class="font-medium text-gray-700 mb-2">Age</label>
+                <input type="number" id="age" class="border rounded-md px-3 py-2" placeholder="Enter age">
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+        <div class="md:col-span-3">
+            <label for="bodyFat" class="font-medium text-gray-700 mb-2 flex items-center">
+                Body Fat % <span class="text-gray-500 text-sm ml-1">(optional)</span>
+            </label>
+            <input type="number" id="bodyFat" class="border rounded-md px-3 py-2 w-full" placeholder="Enter %">
+        </div>
+        
+        <div class="md:col-span-9">
+            <label for="activityFactor" class="font-medium text-gray-700 mb-2">Activity Level</label>
+            <select id="activityFactor" class="border rounded-md px-3 py-2 w-full">
+                <option value="" disabled selected>Select activity level</option>
+                <option value="1.2">Sedentary (little or no exercise)</option>
+                <option value="1.375">Lightly Active (light exercise 1-3 days/week)</option>
+                <option value="1.55">Moderately Active (moderate exercise 3-5 days/week)</option>
+                <option value="1.725">Very Active (heavy exercise 6-7 days/week)</option>
+                <option value="1.9">Extremely Active (very heavy exercise, training 2x/day)</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6">
+        <div class="md:col-span-3">
+            <label class="font-medium text-gray-700 mb-2">Sex</label>
+            <div class="flex space-x-4">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="sex" value="male" class="form-radio text-blue-600" checked>
+                    <span class="ml-2">Male</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="sex" value="female" class="form-radio text-blue-600">
+                    <span class="ml-2">Female</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="md:col-span-9">
+            <label for="weeklyDeficit" class="font-medium text-gray-700 mb-2">Weekly Weight Change Goal</label>
+            <div class="flex items-center space-x-4">
+                <div class="w-full max-w-xs">
+                    <input type="range" id="weeklyDeficitSlider" class="slider w-full" min="0.1" max="2" step="0.1" value="0.5">
+                </div>
+                <div class="flex items-center">
+                    <input type="number" id="weeklyDeficit" class="border rounded-md px-3 py-2 w-20" value="0.5" step="0.1" min="0.1" max="2">
+                    <span id="weeklyDeficitUnit" class="ml-2">kg/week</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">Recommended: 0.5-1kg per week (or 1-2lbs per week)</p>
+        </div>
+    </div>
+    
+    <div class="mt-8">
+        <button id="calculateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300 w-full md:w-auto" onclick="calculateAll()">
+            Calculate Nutrition Plan
+        </button>
+    </div>
+</div>
+
+<!-- Results Section (initially hidden) -->
+<div id="resultsSection" class="hidden">
+    <!-- [Rest of your results section HTML code] -->
+</div>
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-700 mb-6 pb-2 border-b border-blue-100">Your Results</h2>
+        
+        <!-- Main Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="result-box text-center">
+                <h3 class="font-medium text-gray-500 mb-1">Basal Metabolic Rate</h3>
+                <p id="bmrResult" class="text-2xl font-bold text-blue-700">-</p>
+                <p class="text-sm text-gray-500">Calories burned at complete rest</p>
+            </div>
+            
+            <div class="result-box text-center">
+                <h3 class="font-medium text-gray-500 mb-1">Total Daily Energy Expenditure</h3>
+                <p id="tdeeResult" class="text-2xl font-bold text-blue-700">-</p>
+                <p class="text-sm text-gray-500">Total calories burned daily</p>
+            </div>
+            
+            <div class="result-box text-center">
+                <h3 class="font-medium text-gray-500 mb-1">Daily Calorie Target</h3>
+                <p id="intakeResult" class="text-2xl font-bold text-blue-700">-</p>
+                <p class="text-sm text-gray-500">Recommended daily intake</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="result-box text-center">
+                <h3 class="font-medium text-gray-500 mb-1">Daily Calories</h3>
+                <p id="deficitResult" class="text-2xl font-bold text-blue-700">-</p>
+                <p class="text-sm text-gray-500">Daily calorie deficit/surplus</p>
+            </div>
+            
+            <div class="result-box text-center">
+                <h3 class="font-medium text-gray-500 mb-1">Estimated Time to Goal</h3>
+                <p id="timeToGoalResult" class="text-2xl font-bold text-blue-700">-</p>
+                <p class="text-sm text-gray-500">Time to reach desired weight</p>
+            </div>
+        </div>
+        
+        <!-- Body Indices -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <h3 class="font-medium text-gray-700 mb-2">Body Mass Index (BMI)</h3>
+                <div class="relative h-10 mb-6">
+                    <div class="index-slider w-full"></div>
+                    <div class="index-marker" style="left: 25%"></div>
+                    <div class="index-label" style="left: 25%">18.5</div>
+                    <div class="index-marker" style="left: 50%"></div>
+                    <div class="index-label" style="left: 50%">25.0</div>
+                    <div class="index-marker" style="left: 75%"></div>
+                    <div class="index-label" style="left: 75%">30.0</div>
+                    <div id="bmiMarker" class="absolute top-0 w-4 h-4 bg-black rounded-full transform -translate-x-1/2 -translate-y-1/2" style="left: 0%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Underweight</span>
+                    <span>Normal</span>
+                    <span>Overweight</span>
+                    <span>Obese</span>
+                </div>
+                <div class="text-center font-medium mt-1" id="bmiValue">-</div>
+                <div class="text-center text-sm text-gray-600" id="bmiCategory">-</div>
+            </div>
+            
+            <div>
+                <h3 class="font-medium text-gray-700 mb-2">Ponderation Index (PI)</h3>
+                <div class="relative h-10 mb-6">
+                    <div class="index-slider w-full"></div>
+                    <div class="index-marker" style="left: 25%"></div>
+                    <div class="index-label" style="left: 25%">11.0</div>
+                    <div class="index-marker" style="left: 50%"></div>
+                    <div class="index-label" style="left: 50%">15.0</div>
+                    <div class="index-marker" style="left: 75%"></div>
+                    <div class="index-label" style="left: 75%">17.0</div>
+                    <div id="piMarker" class="absolute top-0 w-4 h-4 bg-black rounded-full transform -translate-x-1/2 -translate-y-1/2" style="left: 0%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>Underweight</span>
+                    <span>Normal</span>
+                    <span>Overweight</span>
+                    <span>Obese</span>
+                </div>
+                <div class="text-center font-medium mt-1" id="piValue">-</div>
+                <div class="text-center text-sm text-gray-600" id="piCategory">-</div>
+            </div>
+        </div>
+        
+        <!-- Protein Intake Slider -->
+        <div class="mb-6">
+            <h3 class="font-medium text-gray-700 mb-2">Protein Intake (g/kg of body weight)</h3>
+            <div class="flex items-center space-x-4">
+                <div class="w-full max-w-xs">
+                    <input type="range" id="proteinSlider" class="slider w-full" min="1.2" max="2.2" step="0.1" value="1.4">
+                </div>
+                <div class="flex items-center">
+                    <input type="number" id="proteinIntake" class="border rounded-md px-3 py-2 w-20" value="1.4" step="0.1" min="1.2" max="2.2">
+                    <span id="proteinIntakeUnit" class="ml-2">g/kg</span>
+                </div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1 max-w-xs">
+                <span>1.2 (Min)</span>
+                <span>1.4 (Normal)</span>
+                <span>1.9 (Muscle)</span>
+                <span>2.2 (Max)</span>
+            </div>
+        </div>
+        
+        <!-- Macronutrient Table -->
+        <div class="mb-6">
+            <h3 class="font-medium text-gray-700 mb-3">Macronutrient Breakdown</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr class="bg-blue-50">
+                            <th class="py-2 px-4 border-b text-left">Nutrient</th>
+                            <th class="py-2 px-4 border-b text-right">Grams</th>
+                            <th class="py-2 px-4 border-b text-right">Calories</th>
+                            <th class="py-2 px-4 border-b text-right">Portions</th>
+                            <th class="py-2 px-4 border-b text-right">Per Meal (3x)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-2 px-4 border-b font-medium text-blue-700">Protein</td>
+                            <td id="proteinGrams" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="proteinCalories" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="proteinPortions" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="proteinMeals" class="py-2 px-4 border-b text-right">-</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="py-2 px-4 border-b font-medium text-orange-700">Fat</td>
+                            <td id="fatGrams" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="fatCalories" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="fatPortions" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="fatMeals" class="py-2 px-4 border-b text-right">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 px-4 border-b font-medium text-cyan-700">Carbohydrates</td>
+                            <td id="carbGrams" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="carbCalories" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="carbPortions" class="py-2 px-4 border-b text-right">-</td>
+                            <td id="carbMeals" class="py-2 px-4 border-b text-right">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">Portions: Protein & Carbs (20g per portion), Fat (10g per portion)</p>
+        </div>
+        
+        <!-- Weight Progress Chart -->
+        <div>
+            <h3 class="font-medium text-gray-700 mb-3">Weight Progress Projection</h3>
+            <div class="h-64 border border-gray-200 rounded-lg p-4 bg-white">
+                <canvas id="weightChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Activity Calories Calculator -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-700 mb-6 pb-2 border-b border-blue-100">Activity Calories Calculator</h2>
+        
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <div class="w-full md:w-auto flex-grow">
+                <label for="activityInput" class="font-medium text-gray-700 mb-2 block">Activity</label>
+                <div class="relative">
+                    <input list="metActivities" id="activityInput" class="border rounded-md px-3 py-2 w-full" placeholder="Select or type activity">
+                    <datalist id="metActivities">
+                        <option value="American football competitive (MET: 9.0)"></option>
+                        <option value="American football touch/flag (MET: 8.0)"></option>
+                        <option value="Baseball/Softball (MET: 5.0)"></option>
+                        <option value="Basketball game (MET: 8.0)"></option>
+                        <option value="Basketball shooting (MET: 4.5)"></option>
+                        <option value="Calisthenics heavy (MET: 8.0)"></option>
+                        <option value="Calisthenics light-moderate (MET: 3.5)"></option>
+                        <option value="Cricket (MET: 4.0)"></option>
+                        <option value="Cycling leisurely (MET: 3.5)"></option>
+                        <option value="Cycling 20kph - 22kph (MET: 8.0)"></option>
+                        <option value="Cycling 23kph - 25kph (MET: 10.0)"></option>
+                        <option value="Cycling 26kph - 32kph (MET: 12.0)"></option>
+                        <option value="Cycling 33kph + (MET: 16.0)"></option>
+                        <option value="Football (soccer) competitive (MET: 10.0)"></option>
+                        <option value="Football (soccer) casual (MET: 7.0)"></option>
+                        <option value="Golf and walking (MET: 4.4)"></option>
+                        <option value="Golf and cart (MET: 2.5)"></option>
+                        <option value="Gymnastics (MET: 4.0)"></option>
+                        <option value="Hockey (MET: 8.0)"></option>
+                        <option value="Ice skating (MET: 6.0)"></option>
+                        <option value="Jogging 7.45min/km (MET: 8.0)"></option>
+                        <option value="Lacrosse (MET: 8.0)"></option>
+                        <option value="Rugby (MET: 8.3)"></option>
+                        <option value="Running 6.2min/km (MET: 10.0)"></option>
+                        <option value="Running 5.5min/km (MET: 11.0)"></option>
+                        <option value="Running 4.97min/km (MET: 12.5)"></option>
+                        <option value="Running 4.34min/km (MET: 14.0)"></option>
+                        <option value="Running 3.72min/km (MET: 16.0)"></option>
+                        <option value="Skiing (MET: 8.0)"></option>
+                        <option value="Swimming freestyle (MET: 8.3)"></option>
+                        <option value="Swimming backstroke (MET: 4.8)"></option>
+                        <option value="Swimming breaststroke (MET: 5.3)"></option>
+                        <option value="Swimming butterfly (MET: 13.8)"></option>
+                        <option value="Table tennis (MET: 4.0)"></option>
+                        <option value="Tennis single (MET: 7.0)"></option>
+                        <option value="Tennis double (MET: 5.0)"></option>
+                        <option value="Volleyball casual (MET: 3.0)"></option>
+                        <option value="Volleyball competition (MET: 8.0)"></option>
+                        <option value="Walking strolling (MET: 2.0)"></option>
+                        <option value="Walking 3kph (MET: 2.5)"></option>
+                        <option value="Walking 3.5kph (MET: 3.3)"></option>
+                        <option value="Walking 4.8kph (MET: 3.8)"></option>
+                        <option value="Walking 6.4kph (MET: 5.0)"></option>
+                        <option value="Walking up stairs (MET: 8.0)"></option>
+                    </datalist>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="metValue" class="font-medium text-gray-700 mb-2 block">MET Value</label>
+                <input type="number" id="metValue" class="border rounded-md px-3 py-2 w-full" placeholder="MET" step="0.1" min="1">
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="activityDuration" class="font-medium text-gray-700 mb-2 block">Duration (hours)</label>
+                <input type="number" id="activityDuration" class="border rounded-md px-3 py-2 w-full" placeholder="Hours" step="0.1" min="0.1">
+            </div>
+            
+            <div class="flex items-center mt-4 md:mt-0">
+                <span class="text-xl font-bold mx-2 hidden md:block">=</span>
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="activityCalories" class="font-medium text-gray-700 mb-2 block">Calories</label>
+                <input type="number" id="activityCalories" class="border rounded-md px-3 py-2 w-full" placeholder="Calories">
+            </div>
+            
+            <div class="mt-4 md:mt-0 md:self-end">
+                <button id="addActivityBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="addActivity()">
+                    Add
+                </button>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="font-medium text-gray-700 mb-3">Saved Activities</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr class="bg-blue-50">
+                            <th class="py-2 px-4 border-b text-left">Activity</th>
+                            <th class="py-2 px-4 border-b text-right">MET</th>
+                            <th class="py-2 px-4 border-b text-right">Duration (hours)</th>
+                            <th class="py-2 px-4 border-b text-right">Calories</th>
+                            <th class="py-2 px-4 border-b text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedActivitiesList">
+                        <tr id="noActivitiesRow">
+                            <td colspan="5" class="py-4 text-center text-gray-500">No activities added yet</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-gray-50">
+                        <tr>
+                            <td colspan="3" class="py-2 px-4 text-right font-medium">Total Calories:</td>
+                            <td id="totalActivityCalories" class="py-2 px-4 text-right font-bold">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Intake Calorie Calculator -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-700 mb-6 pb-2 border-b border-blue-100">Intake Calorie Calculator</h2>
+        
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <div class="w-full md:w-auto flex-grow">
+                <label for="foodInput" class="font-medium text-gray-700 mb-2 block">Food</label>
+                <div class="relative">
+                    <input list="foodItems" id="foodInput" class="border rounded-md px-3 py-2 w-full" placeholder="Select or type food">
+                    <datalist id="foodItems">
+                        <optgroup label="Carbohydrates (4 cal/g)">
+                            <option value="100g pâtes (Carb: 131 cal)"></option>
+                            <option value="100g quinoa (Carb: 120 cal)"></option>
+                            <option value="100g riz (Carb: 130 cal)"></option>
+                            <option value="100g couscous (Carb: 112 cal)"></option>
+                            <option value="100g orge (Carb: 123 cal)"></option>
+                            <option value="100g sarrasin (Carb: 92 cal)"></option>
+                            <option value="100g lentilles (Carb: 116 cal)"></option>
+                            <option value="100g pois chiches (Carb: 164 cal)"></option>
+                            <option value="100g haricots (Carb: 127 cal)"></option>
+                            <option value="100–200g céréales (Carb: 375–750 cal)"></option>
+                            <option value="1/2 pita (Carb: 85 cal)"></option>
+                            <option value="1/2 bagel (Carb: 140 cal)"></option>
+                            <option value="100g de maïs ou 1 épi (Carb: 96 cal)"></option>
+                            <option value="2 feuilles de riz (Carb: 70 cal)"></option>
+                            <option value="1 tranche de pain (Carb: 80 cal)"></option>
+                            <option value="1 muffin anglais (25g) (Carb: 66 cal)"></option>
+                            <option value="1 tortilla moyen (Carb: 140 cal)"></option>
+                            <option value="1 crêpe de 15cm de diamètre (Carb: 90 cal)"></option>
+                            <option value="1 muffin (Carb: 265 cal)"></option>
+                            <option value="1 barre tendre (Carb: 130 cal)"></option>
+                            <option value="10 à 12 craquelins (Carb: 120 cal)"></option>
+                            <option value="65g granola, avoine cru (Carb: 306 cal)"></option>
+                            <option value="1 pomme de terre (175g) (Carb: 130 cal)"></option>
+                            <option value="5 à 6 pomme de terre grelots (Carb: 115 cal)"></option>
+                            <option value="1 pomme de terre douce (175g) (Carb: 150 cal)"></option>
+                            <option value="2 c. à table de confiture fruits ou sirop d'érable (Carb: 104 cal)"></option>
+                            <option value="1 c. à table miel (Carb: 64 cal)"></option>
+                            <option value="185ml boisson gazeuse (Carb: 78 cal)"></option>
+                            <option value="500ml Gatorade, boisson sportive (Carb: 120 cal)"></option>
+                            <option value="1 fruit moyen (Carb: 80 cal)"></option>
+                            <option value="1 petite banane ou 1/2 moyenne (Carb: 50 cal)"></option>
+                            <option value="2 petits fruits (Carb: 70 cal)"></option>
+                            <option value="200g framboises, bleuets, ananas (Carb: 100 cal)"></option>
+                            <option value="1/2 mangue (Carb: 70 cal)"></option>
+                            <option value="100g compote (Carb: 68 cal)"></option>
+                            <option value="20 raisins (Carb: 70 cal)"></option>
+                            <option value="185ml jus (Carb: 85 cal)"></option>
+                            <option value="50g fruits séchés (Carb: 150 cal)"></option>
+                            <option value="3 à 4 abricots, pruneaux, dattes (Carb: 110 cal)"></option>
+                        </optgroup>
+                        <optgroup label="Fats (9 cal/g)">
+                            <option value="2 c. à thé de beurre, margarine, huiles (Fat: 80 cal)"></option>
+                            <option value="1/3 avocat (Fat: 80 cal)"></option>
+                            <option value="30g fromage cheddar (Fat: 120 cal)"></option>
+                            <option value="2 c. à soupe noix, amandes, graines (Fat: 190 cal)"></option>
+                            <option value="1 c. à soupe beurre d'arachides, amande (Fat: 95 cal)"></option>
+                            <option value="1 c. à soupe mayonnaise et vinaigrette (Fat: 90 cal)"></option>
+                            <option value="12 olives (Fat: 60 cal)"></option>
+                        </optgroup>
+                        <optgroup label="Proteins (4 cal/g)">
+                            <option value="100g volaille, viande rouge, porc cru (Protein: 143 cal)"></option>
+                            <option value="120–130g poisson (Protein: 160–210 cal)"></option>
+                            <option value="20 crevettes moyennes (Protein: 84 cal)"></option>
+                            <option value="175g yogourt grec (Protein: 100 cal)"></option>
+                            <option value="130g fromage cottage (Protein: 110 cal)"></option>
+                            <option value="130g blanc d'œuf (Protein: 67 cal)"></option>
+                            <option value="2 gros œufs, 3 moyens, 2 extra gros (Protein: 140 cal)"></option>
+                            <option value="1 barre de protéines (Protein: 200 cal)"></option>
+                            <option value="500ml de lait (Protein: 250 cal)"></option>
+                            <option value="60g de fromage de chèvre (Protein: 190 cal)"></option>
+                            <option value="200g edamames (Protein: 250 cal)"></option>
+                            <option value="125g tofu ferme (Protein: 150 cal)"></option>
+                            <option value="200g tofu mou (Protein: 140 cal)"></option>
+                            <option value="100g tempeh (Protein: 195 cal)"></option>
+                            <option value="625ml boisson de soya (Protein: 210 cal)"></option>
+                            <option value="65g lentilles rôties (Protein: 210 cal)"></option>
+                        </optgroup>
+                    </datalist>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="foodType" class="font-medium text-gray-700 mb-2 block">Type</label>
+                <select id="foodType" class="border rounded-md px-3 py-2 w-full">
+                    <option value="carb">Carbohydrate</option>
+                    <option value="fat">Fat</option>
+                    <option value="protein">Protein</option>
+                </select>
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="foodCaloriesPerUnit" class="font-medium text-gray-700 mb-2 block">Cal/Unit</label>
+                <input type="number" id="foodCaloriesPerUnit" class="border rounded-md px-3 py-2 w-full" placeholder="Calories">
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="foodPortions" class="font-medium text-gray-700 mb-2 block">Portions</label>
+                <input type="number" id="foodPortions" class="border rounded-md px-3 py-2 w-full" placeholder="Portions" step="0.1" min="0.1">
+            </div>
+            
+            <div class="flex items-center mt-4 md:mt-0">
+                <span class="text-xl font-bold mx-2 hidden md:block">=</span>
+            </div>
+            
+            <div class="w-full md:w-32">
+                <label for="foodCalories" class="font-medium text-gray-700 mb-2 block">Calories</label>
+                <input type="number" id="foodCalories" class="border rounded-md px-3 py-2 w-full" placeholder="Calories">
+            </div>
+            
+            <div class="mt-4 md:mt-0 md:self-end">
+                <button id="addFoodBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300" onclick="addFood()">
+                    Add
+                </button>
+            </div>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="font-medium text-gray-700 mb-3">Saved Foods</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200">
+                    <thead>
+                        <tr class="bg-blue-50">
+                            <th class="py-2 px-4 border-b text-left">Food</th>
+                            <th class="py-2 px-4 border-b text-right">Type</th>
+                            <th class="py-2 px-4 border-b text-right">Portions</th>
+                            <th class="py-2 px-4 border-b text-right">Calories</th>
+                            <th class="py-2 px-4 border-b text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedFoodsList">
+                        <tr id="noFoodsRow">
+                            <td colspan="5" class="py-4 text-center text-gray-500">No foods added yet</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-gray-50">
+                        <tr>
+                            <td colspan="3" class="py-2 px-4 text-right font-medium">Total Calories:</td>
+                            <td id="totalFoodCalories" class="py-2 px-4 text-right font-bold">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Net Calories Summary -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8 border border-blue-100">
+        <h2 class="text-xl font-semibold text-blue-700 mb-6 pb-2 border-b border-blue-100">Net Calories Summary</h2>
+        
+        <div class="result-box mb-6">
+            <h3 class="font-medium text-gray-700 mb-3">Daily Calorie Balance</h3>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Food Intake:</span>
+                <span id="summaryFoodIntake" class="font-bold text-green-600">0 kcal</span>
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-600">Activity Burned:</span>
+                <span id="summaryActivityBurned" class="font-bold text-red-600">0 kcal</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                <span class="text-gray-700 font-medium">Net Calories:</span>
+                <span id="summaryNetCalories" class="font-bold text-blue-700">0 kcal</span>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h3 class="font-medium text-blue-700 mb-2">Calorie Balance Explained</h3>
+            <p class="text-sm text-gray-600">
+                <strong>Net Calories</strong> = Food Intake - Activity Burned
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+                To lose weight, your Net Calories should be less than your Daily Target.<br>
+                To gain weight, your Net Calories should be more than your Daily Target.
+            </p>
+        </div>
+    </div>
+</div>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>

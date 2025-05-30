@@ -1,0 +1,244 @@
+/* Toggle Switch Styles */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #3b82f6;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #3b82f6;
+}
+
+.toggle-label {
+    transition: background-color 0.2s ease-in;
+}
+
+/* Index Slider Styles */
+.index-slider {
+    height: 8px;
+    background: linear-gradient(to right, 
+        #ef4444 25%, 
+        #22c55e 25%, #22c55e 50%,
+        #f59e0b 50%, #f59e0b 75%,
+        #ef4444 75%
+    );
+    border-radius: 4px;
+}
+
+.index-marker {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 16px;
+    background-color: #000;
+    transform: translateY(-50%);
+}
+
+.index-label {
+    position: absolute;
+    top: -20px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #666;
+}
+
+/* Range Slider Styles */
+.slider {
+    -webkit-appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    background: #e2e8f0;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+}
+
+/* Form Radio Button Styles */
+.form-radio {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    margin-right: 0.5em;
+    vertical-align: text-bottom;
+    position: relative;
+    cursor: pointer;
+}
+
+.form-radio:checked {
+    background-color: #3b82f6;
+}
+
+.form-radio:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.4em;
+    height: 0.4em;
+    background-color: white;
+    border-radius: 50%;
+}
+
+/* Result Box Styles */
+.result-box {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styles */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td {
+    border: 1px solid #e5e7eb;
+}
+
+th:first-child {
+    border-top-left-radius: 0.375rem;
+}
+
+th:last-child {
+    border-top-right-radius: 0.375rem;
+}
+
+tr:last-child td:first-child {
+    border-bottom-left-radius: 0.375rem;
+}
+
+tr:last-child td:last-child {
+    border-bottom-right-radius: 0.375rem;
+}
+
+/* Input Focus Styles */
+input:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    ring: 2px;
+    ring-color: #93c5fd;
+}
+
+/* Button Focus Styles */
+button:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #93c5fd;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .hidden-mobile {
+        display: none;
+    }
+    
+    .w-full-mobile {
+        width: 100%;
+    }
+}
+
+/* Chart Container Styles */
+.chart-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+/* Datalist Dropdown Styles */
+input[list] {
+    background-color: #ffffff;
+}
+
+input[list]::-webkit-calendar-picker-indicator {
+    color: #6b7280;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Animation for Results */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background-color: #1f2937;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
